@@ -174,9 +174,24 @@ footer { border-top: 1px solid var(--line); }
 .publication-profile-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; font-size: 13px; text-decoration: none; }
 .publication-section-heading { padding-block: 28px 18px; }
 .publication-section-heading h2 { font-size: 22px; margin-bottom: 10px; }
-.publication-entry h3 { font-size: 19px; font-weight: 500; line-height: 1.4; margin: 7px 0 10px; max-width: 920px; }
-.publication-entry h3 a { text-decoration: none; }
-.publication-entry h3 a:hover { text-decoration: underline; }
-.publication-entry .publication-meta { font-size: 13px; color: var(--muted); }
-.publication-entry .publication-doi { font-size: 12px; overflow-wrap: anywhere; }
-@media (max-width: 760px) { .publication-profile-links { gap: 4px 20px; } .publication-entry h3 { font-size: 18px; } }
+
+.publication-list { margin: 0; padding: 0 0 0 26px; }
+.publication-item { padding: 12px 0 13px 8px; border-top: 1px solid var(--line); }
+.publication-item::marker { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.publication-item article { min-width: 0; }
+.publication-item h3 { font-size: 15.5px; line-height: 1.45; font-weight: 600; margin: 0 0 4px; }
+.publication-item h3 a { text-decoration: none; }
+.publication-item h3 a:hover { text-decoration: underline; }
+.publication-item .publication-authors { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin: 0 0 3px; }
+.publication-authors strong { color: var(--ink); font-weight: 700; }
+.publication-authors summary { display: block; padding: 0; font-size: inherit; line-height: inherit; }
+.publication-authors summary:focus-visible { outline-offset: 2px; }
+.publication-authors p { margin: 2px 0 0; }
+.authors-expand, .authors-collapse { color: var(--accent); font-size: 11px; text-decoration: underline; text-underline-offset: 2px; }
+.authors-expand { margin-left: 8px; }
+.authors-collapse { display: none; }
+.publication-authors[open] .authors-preview, .publication-authors[open] .authors-expand { display: none; }
+.publication-authors[open] .authors-collapse { display: inline; }
+.publication-item .publication-meta { font-size: 12px; line-height: 1.5; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+.publication-meta a { white-space: nowrap; }
+@media (max-width: 760px) { .publication-profile-links { gap: 4px 20px; } .publication-list { padding-left: 22px; } .publication-item { padding-left: 4px; } .publication-item h3 { font-size: 15px; } }
