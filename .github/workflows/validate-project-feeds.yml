@@ -3,6 +3,10 @@ on:
   push:
     paths:
       - 'projects.mjs'
+      - 'projects.html'
+      - 'publications.html'
+      - 'styles.css'
+      - 'assets/*-illustration.svg'
       - '.github/workflows/validate-project-feeds.yml'
   workflow_dispatch:
 permissions:
@@ -40,4 +44,49 @@ jobs:
           assert.ok(fundings.every(p=>p.title && p.url));
           console.log('PROJECT_FEEDS_JSON='+JSON.stringify({fundings,repos}));
           console.log('Live feeds and selection checks passed.');
+          JS
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+      - name: Check desktop and mobile layouts
+        run: |
+          node --input-type=module <<'JS'
+          import {chromium} from 'playwright';
+          import http from 'node:http';
+          import fs from 'node:fs/promises';
+          import path from 'node:path';
+          import assert from 'node:assert/strict';
+          const root=process.cwd();
+          const server=http.createServer(async(req,res)=>{
+            try {
+              const pathname=new URL(req.url,'http://localhost').pathname;
+              const file=path.resolve(root,'.'+pathname);
+              if(!file.startsWith(root+path.sep)) {res.writeHead(403);res.end();return;}
+              const types={'.html':'text/html','.css':'text/css','.mjs':'text/javascript','.js':'text/javascript','.svg':'image/svg+xml'};
+              res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');
+              res.end(await fs.readFile(file));
+            }catch {res.writeHead(404);res.end();}
+          }).listen(8765);
+          const browser=await chromium.launch({headless:true});
+          try {
+            for(const width of [390,768,1280]) {
+              const page=await browser.newPage({viewport:{width,height:1000}});
+              for(const name of ['projects','publications']) {
+                await page.goto('http://localhost:8765/'+name+'.html');
+                await page.locator('.heading-illustration').waitFor();
+                const result=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,image:document.querySelector('.heading-illustration').getBoundingClientRect().width,loaded:document.querySelector('.heading-illustration').naturalWidth>0}));
+                assert.equal(result.overflow,false,name+' horizontal overflow at '+width);
+                assert.equal(result.loaded,true,name+' illustration did not load');
+                assert.ok(result.image<=(width<=600?64:96),name+' illustration too large');
+                if(name==='projects') {
+                  await page.waitForFunction(()=>document.getElementById('funding-status').textContent.includes('Checked'),{timeout:25000});
+                  assert.equal(await page.locator('#funded-project-list > li').count(),5);
+                  assert.ok(await page.locator('#github-project-list > li').count()<=5);
+                }
+                console.log('LAYOUT_PASS '+name+' '+width+'px '+JSON.stringify(result));
+              }
+              await page.close();
+            }
+          } finally {await browser.close();server.close();}
           JS
