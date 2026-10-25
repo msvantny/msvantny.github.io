@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - 'projects.mjs'
+      - 'index.html'
+      - 'about.html'
+      - 'professional-activities.mjs'
       - 'projects.html'
       - 'publications.html'
       - 'styles.css'
@@ -86,6 +89,19 @@ jobs:
                 }
                 console.log('LAYOUT_PASS '+name+' '+width+'px '+JSON.stringify(result));
               }
+              await page.goto('http://localhost:8765/index.html');
+              assert.equal(await page.locator('.home-overview > a').count(),6);
+              const cards=await page.locator('.home-overview > a').evaluateAll(nodes=>nodes.map(n=>({top:n.getBoundingClientRect().top,left:n.getBoundingClientRect().left})));
+              if(width>760) {assert.equal(cards[0].top,cards[2].top);assert.equal(cards[3].top,cards[5].top);assert.ok(cards[3].top>cards[0].top);}
+              else {assert.ok(cards.every((c,i)=>i===0||c.top>cards[i-1].top));}
+              assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+              await page.goto('http://localhost:8765/about.html');
+              await page.waitForFunction(()=>document.getElementById('activity-status').textContent.includes('Checked'),null,{timeout:25000});
+              const activityCount=await page.locator('#professional-activity-list .publication-item').count();
+              assert.ok((await page.locator('#activity-status').textContent()).includes(activityCount+' professional'));
+              assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+              assert.ok(await page.evaluate(()=>document.querySelector('.professional-activities').getBoundingClientRect().top>=document.querySelector('.about-grid').getBoundingClientRect().bottom));
+              console.log('HOME_ABOUT_PASS '+width+'px: 6 cards; '+activityCount+' live professional activities.');
               await page.close();
             }
           } finally {await browser.close();server.close();}
