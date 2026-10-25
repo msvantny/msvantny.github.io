@@ -166,3 +166,17 @@ footer { border-top: 1px solid var(--line); }
 .profile-group .profile-links li:last-child a { border-bottom: 0; }
 .profile-name { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
 .profile-icon { flex: 0 0 20px; }
+
+/* Publication sources stay visible; the latest journal articles follow below. */
+.publication-record { border-block: 1px solid var(--line); padding-block: 20px; }
+.publication-record h2 { font-size: 18px; margin-bottom: 14px; }
+.publication-profile-links { display: flex; flex-wrap: wrap; gap: 10px 24px; list-style: none; margin: 0; padding: 0; }
+.publication-profile-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; font-size: 13px; text-decoration: none; }
+.publication-section-heading { padding-block: 28px 18px; }
+.publication-section-heading h2 { font-size: 22px; margin-bottom: 10px; }
+.publication-entry h3 { font-size: 19px; font-weight: 500; line-height: 1.4; margin: 7px 0 10px; max-width: 920px; }
+.publication-entry h3 a { text-decoration: none; }
+.publication-entry h3 a:hover { text-decoration: underline; }
+.publication-entry .publication-meta { font-size: 13px; color: var(--muted); }
+.publication-entry .publication-doi { font-size: 12px; overflow-wrap: anywhere; }
+@media (max-width: 760px) { .publication-profile-links { gap: 4px 20px; } .publication-entry h3 { font-size: 18px; } }
