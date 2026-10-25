@@ -1,0 +1,43 @@
+name: Validate project feeds
+on:
+  push:
+    paths:
+      - 'projects.mjs'
+      - '.github/workflows/validate-project-feeds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check filtering and live public feeds
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {selectFundings, selectRepositories, fundingMarkup, repositoryMarkup, FUNDINGS_API, REPOS_API} from './projects.mjs';
+          assert.throws(()=>selectFundings({error:'bad'}));
+          assert.throws(()=>selectRepositories({message:'rate limited'}));
+          const funding=(id,year)=>({'funding-summary':[{visibility:'public',title:{title:{value:'Project '+id}},organization:{name:'Test funder'},'start-date':{year:{value:year}},'end-date':{year:{value:'2029'}},'external-ids':{'external-id':[{'external-id-type':'grant-number','external-id-value':id,'external-id-relationship':'self'}]}}]});
+          const fixture={group:[funding('older','2020'),funding('new','2025'),funding('new','2025')]};
+          assert.deepEqual(selectFundings(fixture).map(p=>p.id),['new','older']);
+          assert.ok(fundingMarkup([{title:'<script>',sponsor:'A&B',id:'x',years:'2025',url:'https://orcid.org'}]).includes('&lt;script&gt;'));
+          const owner={login:'msvantny'};
+          assert.equal(selectRepositories([{name:'fork',owner,fork:true},{name:'private',owner,private:true},{name:'archived',owner,archived:true},{name:'public',owner,pushed_at:'2026-01-01',html_url:'https://github.com/msvantny/public'}]).length,1);
+          async function get(url,github=false) {
+            const response=await fetch(url,{headers:github?{Accept:'application/vnd.github+json',Authorization:'Bearer '+process.env.GITHUB_TOKEN}:{Accept:'application/json'},signal:AbortSignal.timeout(30000)});
+            if(!response.ok) throw new Error(url+': '+response.status);
+            return response.json();
+          }
+          const [fundings,repos]=await Promise.all([get(FUNDINGS_API).then(selectFundings),get(REPOS_API,true).then(selectRepositories)]);
+          assert.ok(fundings.length<=5 && repos.length<=5);
+          assert.ok(fundings.every(p=>p.title && p.url));
+          console.log('PROJECT_FEEDS_JSON='+JSON.stringify({fundings,repos}));
+          console.log('Live feeds and selection checks passed.');
+          JS
