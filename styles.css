@@ -223,3 +223,31 @@ footer { border-top: 1px solid var(--line); }
 .playlist-caption { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px 24px; margin-top: 16px; }
 .playlist-caption p { max-width: 540px; }
 .playlist-caption > a { font-size: 13px; }
+
+/* Conferences reuse the compact list language, with bounded photo thumbnails. */
+.conference-section { border-top: 1px solid var(--line); margin-top: 28px; }
+.conference-section-heading { padding-block: 24px 16px; }
+.conference-section-heading h2 { margin-bottom: 8px; }
+.conference-events { list-style: none; margin: 0; padding: 0; }
+.conference-event { border-top: 1px solid var(--line); padding: 18px 0; overflow-wrap: anywhere; }
+.conference-event h3 { font-size: 17px; font-weight: 600; line-height: 1.4; margin: 0 0 4px; }
+.conference-event h3 a, .conference-contribution-title a { text-decoration: none; }
+.conference-event a:hover { text-decoration: underline; }
+.conference-meta { font-size: 12px; color: var(--muted); margin: 2px 0; }
+.conference-description { font-size: 13px; max-width: 780px; margin: 8px 0; }
+.conference-contributions { padding-left: 19px; margin: 12px 0 0; }
+.conference-contributions > li { margin: 10px 0; padding-left: 3px; }
+.conference-contributions > li::marker { color: var(--accent); font-size: 11px; }
+.conference-contribution-title { font-size: 14px; font-weight: 600; line-height: 1.5; }
+.conference-authors { font-size: 12px; color: var(--muted); }
+.conference-authors summary { display: inline-block; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+.conference-authors summary::after { content: ' +'; }
+.conference-authors[open] summary::after { content: ' −'; }
+.conference-authors p { max-width: 850px; }
+.conference-photos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.conference-photos a { display: block; width: 144px; max-width: calc(50% - 5px); }
+.conference-photos img { display: block; width: 100%; max-width: 144px; height: 96px; object-fit: cover; border: 1px solid var(--line); }
+.conference-archive { border-block: 1px solid var(--line); margin-bottom: 28px; }
+.conference-archive > summary { font-size: 13px; font-weight: 600; }
+.conference-source { margin-top: 12px; }
+@media (max-width: 600px) { .conference-event h3 { font-size: 16px; } .conference-contribution-title { font-size: 13px; } .conference-photos a { width: 128px; } .conference-photos img { height: 85px; } }
