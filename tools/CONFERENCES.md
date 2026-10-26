@@ -14,7 +14,9 @@ Publish = Yes zahrne řádek do veřejného výstupu. Sloupce Review notes a Ori
 
 ## Jednorázové zapnutí automatických aktualizací
 
-Stránka obsahuje uloženou schválenou verzi. Automatický zdroj zatím není aktivovaný.
+Automatický zdroj je aktivní od 26. října 2026. Při otevření stránky se načtou aktuální záznamy s Publish = Yes a fotografie ze složky Galerie_Conferences. Běžné změny provádějte pouze v tabulce a galerii; skript znovu implementovat nemusíte. Stránka také obsahuje uloženou schválenou verzi pro případ výpadku zdroje.
+
+Následující kroky slouží jen k případnému novému nastavení:
 
 1. V Google tabulce zvolte Rozšíření → Apps Script.
 2. Vložte obsah souboru `conferences-feed.gs` a uložte.
