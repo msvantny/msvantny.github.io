@@ -4,6 +4,7 @@ on:
     paths:
       - 'projects.mjs'
       - 'index.html'
+      - 'videos.html'
       - 'about.html'
       - 'professional-activities.mjs'
       - 'projects.html'
@@ -102,6 +103,14 @@ jobs:
               assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
               assert.ok(await page.evaluate(()=>document.querySelector('.professional-activities').getBoundingClientRect().top>=document.querySelector('.about-grid').getBoundingClientRect().bottom));
               console.log('HOME_ABOUT_PASS '+width+'px: 6 cards; '+activityCount+' live professional activities.');
+              await page.goto('http://localhost:8765/videos.html');
+              assert.equal(await page.locator('video').count(),0);
+              assert.equal(await page.locator('.youtube-player iframe').count(),1);
+              assert.ok((await page.locator('.youtube-player iframe').getAttribute('src')).includes('PL5j8OBCSHNnQx0IiaYhAmxtuQCGaH8rJG'));
+              assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+              const player=await page.locator('.youtube-player iframe').boundingBox();
+              assert.ok(player.height>=200 && player.width<=width);
+              console.log('VIDEO_LAYOUT_PASS '+width+'px '+JSON.stringify(player));
               await page.close();
             }
           } finally {await browser.close();server.close();}
