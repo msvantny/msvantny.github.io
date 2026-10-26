@@ -30,3 +30,8 @@ Tabulka ani složka nemusí mít veřejné sdílení. Veřejná webová aplikace
 Při nedostupném zdroji zůstane viditelná uložená verze. Ta se sama nepřepisuje: pro odstranění již dříve uloženého záznamu je třeba aktualizovat i uloženou verzi webu. Až bude živé propojení ověřeno, lze zálohu změnit na neutrální hlášení podle požadovaného chování.
 
 Dokumentace: https://developers.google.com/apps-script/guides/content a https://developers.google.com/apps-script/guides/web.
+
+
+## Bezpečnostní úprava 26. října 2026
+
+Web načítá odpověď endpointu jako JSON pomocí fetch; nepoužívá JSONP ani nespouští vzdálený skript. Stávající nasazení již JSON podporuje, proto není třeba nic znovu implementovat. Bezpečnostní kontrola a omezení jsou popsány v [SECURITY-AUDIT.md](SECURITY-AUDIT.md).

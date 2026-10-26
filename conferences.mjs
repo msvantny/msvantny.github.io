@@ -61,15 +61,14 @@ if (typeof document !== 'undefined') {
   });
   const config = document.querySelector('meta[name="conference-feed"]')?.content;
   if (config && /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(config)) {
-    // Read-only JSONP endpoint returns explicitly selected public fields only.
-    const callback = 'conferenceFeed_' + Math.random().toString(36).slice(2);
-    const script = document.createElement('script');
+    // Treat the remote response as data, never as executable JSONP.
     const status = document.getElementById('conference-status');
-    const finish = () => { clearTimeout(timer); script.remove(); delete window[callback]; };
-    const timer = setTimeout(() => { status.textContent = 'Saved selection shown; live update unavailable.'; finish(); },60000);
-    window[callback] = feed => { try { renderFeed(feed); status.textContent = 'Source: personal conference records · Updated from Google Sheets.'; } catch { status.textContent = 'Saved selection shown; live update unavailable.'; } finally { finish(); } };
-    script.onerror = () => { status.textContent = 'Saved selection shown; live update unavailable.'; finish(); };
-    script.src = config + '?callback=' + callback;
-    document.head.appendChild(script);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60000);
+    fetch(config, {credentials:'omit', redirect:'follow', signal:controller.signal})
+      .then(response => { if (!response.ok) throw new Error('Conference feed unavailable'); return response.json(); })
+      .then(feed => { renderFeed(feed); status.textContent = 'Source: personal conference records · Updated from Google Sheets.'; })
+      .catch(() => { status.textContent = 'Saved selection shown; live update unavailable.'; })
+      .finally(() => clearTimeout(timer));
   }
 }

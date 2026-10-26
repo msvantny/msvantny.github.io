@@ -4,25 +4,39 @@ on:
     - cron: '23 5 * * *'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: youtube-playlist-refresh
   cancel-in-progress: false
 jobs:
   refresh:
+    permissions:
+      contents: write
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
       - run: python tools/update-youtube-playlist.py
       - name: Save changed metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add assets/youtube-playlist.json
           if ! git diff --cached --quiet; then
             git commit -m 'Refresh public YouTube playlist previews'
-            git push
+            python - <<'PYTHON'
+          import base64, os, subprocess
+          credential = base64.b64encode(('x-access-token:' + os.environ['GH_TOKEN']).encode()).decode()
+          result = subprocess.run(['git', '-c', 'http.https://github.com/.extraheader=AUTHORIZATION: basic ' + credential, 'push', 'origin', 'HEAD:main'])
+          if result.returncode:
+              raise SystemExit('Metadata push failed.')
+          PYTHON
           fi
+
