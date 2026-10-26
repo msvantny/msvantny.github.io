@@ -1,43 +1,36 @@
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const external = url => /^https?:\/\//i.test(String(url)) ? String(url) : '';
 const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-function dateOrder(event) {
-  const text = String(event.dates || '').toLowerCase();
+function dateOrder(row) {
+  const text = String(row.dates || '').toLowerCase();
   const month = months.reduce((last,m,i) => text.includes(m) ? i : last,-1);
   const day = Number(text.match(/^\d{1,2}(?!\d)/)?.[0] || 0);
-  return Number(event.year) * 10000 + (month + 1) * 100 + day;
+  return Number(row.year) * 10000 + (month + 1) * 100 + day;
 }
-export function groupEvents(rows) {
+export function selectRows(rows) {
   if (!Array.isArray(rows)) throw new Error('Invalid conference feed');
-  const groups = new Map();
-  for (const row of rows) {
-    if (!row.event || !Number.isInteger(Number(row.year))) continue;
-    const key = [row.event.trim().toLowerCase(),row.year,String(row.location || '').trim().toLowerCase()].join('|');
-    let event = groups.get(key);
-    if (!event) { event = {...row, contributions:[], photos:[], description:row.description || ''}; groups.set(key,event); }
-    if (!event.dates && row.dates) event.dates = row.dates;
-    for (const photo of row.photos || []) if (photo?.src && !event.photos.some(p => p.src === photo.src)) event.photos.push(photo);
-    if (row.title) event.contributions.push({title:row.title,authors:row.authors || '',role:row.role || '',attendance:row.attendance || '',url:external(row.url)});
-  }
-  return [...groups.values()].sort((a,b) => dateOrder(b)-dateOrder(a) || a.event.localeCompare(b.event));
+  return rows.filter(row=> typeof row.event === 'string' && row.event.trim() && /^\d{4}$/.test(String(row.year))).slice().sort((a,b)=>dateOrder(b)-dateOrder(a)||a.event.localeCompare(b.event)||String(a.title||'').localeCompare(String(b.title||'')));
 }
+const metadata = (row,participation) => [row.dates || row.year,row.location,row.role,participation ? (row.attendance === 'Yes' ? 'Attended in person' : row.attendance === 'No' ? 'Did not attend' : '') : ''].filter(Boolean).map(esc).join(' · ');
 function imageUrl(url) {
   return /^assets\/conferences\/[a-z0-9-]+\.webp$/.test(url) || /^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(url) ? url : '';
 }
-function authorMarkup(authors) {
-  if (!authors) return '';
-  return `<details class="conference-authors"><summary>Authors</summary><p>${esc(authors)}</p></details>`;
+export function eventMarkup(row,kind='participation',compact=false) {
+  const participation = kind === 'participation';
+  const link = external(row.url);
+  const heading = !participation && link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(row.event)}&nbsp;↗</a>` : esc(row.event);
+  const title = row.title ? (link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(row.title)}&nbsp;↗</a>` : esc(row.title)) : '';
+  if (compact) return `<li><strong>${heading}</strong><span class="conference-meta"> · ${metadata(row,participation)}</span>${title ? `<p>${title}</p>` : row.description ? `<p>${esc(row.description)}</p>` : ''}</li>`;
+  const photos = (Array.isArray(row.photos) ? row.photos : []).filter(p=>imageUrl(p.src)).slice(0,4);
+  const gallery = photos.length ? `<div class="conference-photos">${photos.map((p,i)=>`<a href="${esc(external(p.url)||imageUrl(p.src))}" target="_blank" rel="noopener noreferrer" aria-label="Open photo ${i+1}: ${esc(row.event)}"><img src="${esc(imageUrl(p.src))}" alt="${esc(row.event)} — photo ${i+1}" width="144" height="96" loading="lazy"></a>`).join('')}</div>` : '';
+  const authors = participation && row.authors ? `<details class="conference-authors"><summary>Authors</summary><p>${esc(row.authors)}</p></details>` : '';
+  return `<li class="conference-event"><article><h3>${heading}</h3><p class="conference-meta">${metadata(row,participation)}</p>${row.description ? `<p class="conference-description${participation ? ' conference-full-name' : ''}">${esc(row.description)}</p>` : ''}${title ? `<p class="conference-contribution-title">${title}</p>` : ''}${authors}${gallery}</article></li>`;
 }
-export function eventMarkup(event) {
-  const title = !event.contributions.length && external(event.url) ? `<a href="${esc(external(event.url))}" target="_blank" rel="noopener noreferrer">${esc(event.event)} ↗</a>` : esc(event.event);
-  const photos = event.photos.filter(p => imageUrl(p.src)).slice(0,4);
-  const gallery = photos.length ? `<div class="conference-photos">${photos.map((p,i) => `<a href="${esc(external(p.url) || imageUrl(p.src))}" target="_blank" rel="noopener noreferrer" aria-label="Open photo ${i+1}: ${esc(event.event)}"><img src="${esc(imageUrl(p.src))}" alt="${esc(event.event)} — photo ${i+1}" width="144" height="96" loading="lazy"></a>`).join('')}</div>` : '';
-  return `<li class="conference-event"><article><h3>${title}</h3><p class="conference-meta">${[event.dates || event.year,event.location].filter(Boolean).map(esc).join(' · ')}</p>${event.description ? `<p class="conference-description">${esc(event.description)}</p>` : ''}${!event.contributions.length && event.role ? `<p class="conference-meta">${esc(event.role)}</p>` : ''}${event.contributions.length ? `<ul class="conference-contributions">${event.contributions.map(c => `<li><p class="conference-contribution-title">${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.title)} ↗</a>` : esc(c.title)}</p><p class="conference-meta">${esc(c.role)}${c.attendance === 'Yes' ? ' · Attended in person' : c.attendance === 'No' ? ' · Co-authored contribution; did not attend' : ''}</p>${authorMarkup(c.authors)}</li>`).join('')}</ul>` : ''}${gallery}</article></li>`;
-}
-export function sectionMarkup(rows, label) {
-  const events = groupEvents(rows);
-  const recent = events.slice(0,5), older = events.slice(5);
-  return `${recent.length ? `<ul class="conference-events">${recent.map(eventMarkup).join('')}</ul>` : '<p class="source-empty">No events selected yet.</p>'}${older.length ? `<details class="conference-archive"><summary><span>${esc(label)} archive <small>${older.length} earlier events</small></span><span class="details-toggle" aria-hidden="true">+</span></summary><ul class="conference-events">${older.map(eventMarkup).join('')}</ul></details>` : ''}`;
+export function sectionMarkup(rows,kind='participation',archive=false) {
+  const selected = selectRows(rows);
+  if (!selected.length) return '<p class="source-empty">No records selected yet.</p>';
+  if (archive) return `<ul class="conference-compact">${selected.map(r=>eventMarkup(r,kind,true)).join('')}</ul>`;
+  return `<ul class="conference-events">${selected.slice(0,5).map(r=>eventMarkup(r,kind)).join('')}</ul><p class="conference-archive-link"><a href="conferences-archive.html#${kind}" target="_blank" rel="noopener noreferrer">View full archive (${selected.length}) ↗</a></p>`;
 }
 export function validateFeed(feed) {
   if (!feed || !Array.isArray(feed.organized) || !Array.isArray(feed.participation)) throw new Error('Invalid feed');
@@ -45,9 +38,13 @@ export function validateFeed(feed) {
 }
 export function renderFeed(feed) {
   validateFeed(feed);
-  document.getElementById('organized-events').innerHTML = sectionMarkup(feed.organized,'Organised events');
-  document.getElementById('participation-events').innerHTML = sectionMarkup(feed.participation,'Conference contributions');
+  const archive = document.body.dataset.conferenceView === 'archive';
+  const organized = sectionMarkup(feed.organized,'organized',archive);
+  const participation = sectionMarkup(feed.participation,'participation',archive);
+  document.getElementById('organized-events').innerHTML = organized;
+  document.getElementById('participation-events').innerHTML = participation;
 }
+
 if (typeof document !== 'undefined') {
   // Browsers block top-level navigation to data URLs. Open a temporary Blob URL
   // for photos delivered by the private Drive feed.

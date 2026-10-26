@@ -225,24 +225,26 @@ footer { border-top: 1px solid var(--line); }
 .playlist-caption > a { font-size: 13px; }
 
 /* Conferences reuse the compact list language, with bounded photo thumbnails. */
-.conference-section { border-top: 1px solid var(--line); margin-top: 28px; }
-.conference-section-heading { padding-block: 24px 16px; }
-.conference-section-heading h2 { margin-bottom: 8px; }
+.conference-columns { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 34px; align-items: start; }
+.conference-section { min-width: 0; margin-top: 8px; }
+.conference-section-heading { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--soft); padding: 14px 16px; margin-bottom: 4px; }
+.conference-section-heading h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
 .conference-events { list-style: none; margin: 0; padding: 0; }
-.conference-event { border-top: 1px solid var(--line); padding: 18px 0; overflow-wrap: anywhere; }
-.conference-event h3 { font-size: 17px; font-weight: 600; line-height: 1.4; margin: 0 0 4px; }
+.conference-event { border-bottom: 1px solid var(--line); padding: 15px 0; overflow-wrap: anywhere; }
+.conference-event h3 { font-size: 16px; font-weight: 700; line-height: 1.4; margin: 0 0 4px; }
 .conference-event h3 a, .conference-contribution-title a { text-decoration: none; }
 .conference-event a:hover { text-decoration: underline; }
 .conference-meta { font-size: 12px; color: var(--muted); margin: 2px 0; }
-.conference-description { font-size: 13px; max-width: 780px; margin: 8px 0; }
+.conference-description { font-size: 13px; max-width: 780px; margin: 6px 0 0; }
+.conference-full-name { color: var(--muted); font-size: 12px; line-height: 1.5; margin-bottom: 7px; }
 .conference-contributions { padding-left: 19px; margin: 12px 0 0; }
 .conference-contributions > li { margin: 10px 0; padding-left: 3px; }
 .conference-contributions > li::marker { color: var(--accent); font-size: 11px; }
-.conference-contribution-title { font-size: 14px; font-weight: 600; line-height: 1.5; }
+.conference-contribution-title { font-size: 13px; font-weight: 500; line-height: 1.5; margin-top: 7px; }
 .conference-authors { font-size: 12px; color: var(--muted); }
 .conference-authors summary { display: inline-block; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
-.conference-authors summary::after { content: ' +'; }
-.conference-authors[open] summary::after { content: ' −'; }
+.conference-authors summary::before { content: '+ '; }
+.conference-authors[open] summary::before { content: '− '; }
 .conference-authors p { max-width: 850px; }
 .conference-photos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .conference-photos a { display: block; width: 144px; max-width: calc(50% - 5px); }
@@ -250,4 +252,27 @@ footer { border-top: 1px solid var(--line); }
 .conference-archive { border-block: 1px solid var(--line); margin-bottom: 28px; }
 .conference-archive > summary { font-size: 13px; font-weight: 600; }
 .conference-source { margin-top: 12px; }
+.conference-archive-link { margin: 15px 0 26px; font-size: 13px; }
+.conference-compact { padding-left: 18px; margin: 14px 0 24px; font-size: 12px; }
+.conference-compact > li { padding: 8px 0 10px 3px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.conference-compact p { margin-top: 3px; }
+.conference-compact strong { font-size: 13px; }
+.conference-compact .conference-meta { font-size: 11px; }
+.conference-compact a { text-decoration: none; }
+.conference-compact a:hover { text-decoration: underline; }
+@media (max-width: 850px) { .conference-columns { grid-template-columns: 1fr; gap: 20px; } }
 @media (max-width: 600px) { .conference-event h3 { font-size: 16px; } .conference-contribution-title { font-size: 13px; } .conference-photos a { width: 128px; } .conference-photos img { height: 85px; } }
+
+/* Playlist previews are visible before playback and share the main player. */
+.video-strip-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 20px; }
+.video-strip-heading h2 { font-size: 17px; font-weight: 600; }
+.video-strip-controls { display: flex; gap: 8px; }
+.video-strip-controls button { background: transparent; color: var(--ink); border: 1px solid var(--line); min-width: 38px; min-height: 38px; cursor: pointer; }
+.video-strip { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 48px) / 5); gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px 0; overscroll-behavior-inline: contain; }
+.video-card { display: block; color: var(--ink); text-decoration: none; scroll-snap-align: start; min-width: 0; font-size: 12px; line-height: 1.4; }
+.video-card img { display: block; width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; border: 2px solid transparent; }
+.video-card[aria-current="true"] img { border-color: var(--accent); }
+.video-card span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 6px 2px 0; }
+.video-card:hover span { text-decoration: underline; }
+@media (max-width: 760px) { .video-strip { grid-auto-columns: calc((100% - 24px) / 3); } }
+@media (max-width: 480px) { .video-strip { grid-auto-columns: 43%; } }

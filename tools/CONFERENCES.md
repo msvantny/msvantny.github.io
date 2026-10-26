@@ -2,11 +2,13 @@
 
 Zdrojem je Google tabulka Conferences, listy Organized a Participation.
 
+Hlavní stránka má dva sloupce a v každém pět nejnovějších záznamů. Samostatný archiv zobrazuje všechny schválené záznamy stručně v odrážkách, bez fotografií a rozbalování. Na mobilu jsou sloupce pod sebou.
+
 ## Nový záznam
 
 Přidejte řádek na konec příslušné tabulky. ID můžete nechat prázdné; starší ID neměňte. Pořadí řádků není důležité: web řadí sestupně podle roku a známého termínu. Termíny pište anglicky, například `10–12 June 2026`; při neznámém termínu ponechte Dates prázdné. Je-li znám jen rok, událost se zařadí za datované události téhož roku.
 
-Vyplňte Event, Year a potřebné podrobnosti. V Participation odpovídá jeden řádek jednomu příspěvku; stejný Event, Year a Location web seskupí do jedné konference. Role je role u příspěvku, Attendance znamená osobní účast. Neznámá účast není na webu prezentována jako potvrzená.
+Vyplňte Event, Year a potřebné podrobnosti. V Participation odpovídá jeden řádek jednomu příspěvku; příspěvky z jedné konference se zobrazují jako samostatné záznamy. Do Description v Participation patří plný název konference. Role je role u příspěvku, Attendance znamená osobní účast. Neznámá účast není na webu prezentována jako potvrzená.
 
 Fotografie nahrajte do Galerie_Conferences a jejich přesné názvy (včetně přípony) uveďte v Photos oddělené středníkem. Použijí se nejvýše čtyři snímky na událost.
 

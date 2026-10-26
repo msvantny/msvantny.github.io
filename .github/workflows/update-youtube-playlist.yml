@@ -1,0 +1,28 @@
+name: Refresh YouTube playlist previews
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: youtube-playlist-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/update-youtube-playlist.py
+      - name: Save changed metadata
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/youtube-playlist.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh public YouTube playlist previews'
+            git push
+          fi

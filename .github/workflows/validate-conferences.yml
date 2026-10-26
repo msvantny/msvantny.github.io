@@ -4,6 +4,10 @@ on:
     paths:
       - 'conferences.html'
       - 'conferences.mjs'
+      - 'conferences-archive.html'
+      - 'videos.mjs'
+      - 'videos.html'
+      - 'tools/update-youtube-playlist.py'
       - 'tools/conferences-feed.gs'
       - 'tests/conferences.test.mjs'
       - '.github/workflows/validate-conferences.yml'
