@@ -49,6 +49,19 @@ export function renderFeed(feed) {
   document.getElementById('participation-events').innerHTML = sectionMarkup(feed.participation,'Conference contributions');
 }
 if (typeof document !== 'undefined') {
+  // Browsers block top-level navigation to data URLs. Open a temporary Blob URL
+  // for photos delivered by the private Drive feed.
+  document.addEventListener('click', event => {
+    const anchor = event.target.closest?.('.conference-photos a');
+    const href = anchor?.getAttribute('href') || '';
+    if (!/^data:image\/(?:jpeg|png|webp);base64,/.test(href)) return;
+    event.preventDefault();
+    const [header, encoded] = href.split(',');
+    const bytes = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+    const url = URL.createObjectURL(new Blob([bytes], {type:header.slice(5,header.indexOf(';'))}));
+    window.open(url, '_blank', 'noopener,noreferrer');
+    setTimeout(() => URL.revokeObjectURL(url),60000);
+  });
   const config = document.querySelector('meta[name="conference-feed"]')?.content;
   if (config && /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(config)) {
     // Read-only JSONP endpoint returns explicitly selected public fields only.
@@ -56,7 +69,7 @@ if (typeof document !== 'undefined') {
     const script = document.createElement('script');
     const status = document.getElementById('conference-status');
     const finish = () => { clearTimeout(timer); script.remove(); delete window[callback]; };
-    const timer = setTimeout(() => { status.textContent = 'Saved selection shown; live update unavailable.'; finish(); },20000);
+    const timer = setTimeout(() => { status.textContent = 'Saved selection shown; live update unavailable.'; finish(); },60000);
     window[callback] = feed => { try { renderFeed(feed); status.textContent = 'Source: personal conference records · Updated from Google Sheets.'; } catch { status.textContent = 'Saved selection shown; live update unavailable.'; } finally { finish(); } };
     script.onerror = () => { status.textContent = 'Saved selection shown; live update unavailable.'; finish(); };
     script.src = config + '?callback=' + callback;
