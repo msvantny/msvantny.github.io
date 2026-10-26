@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#182b35">
   <title>Michal Švantner · Research</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=research-topics-20261026">
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -17,21 +17,25 @@
     <nav aria-label="Main navigation"><a href="index.html">Home</a><a href="research.html" aria-current="page">Research</a><a href="projects.html">Projects</a><a href="publications.html">Publications</a><a href="conferences.html">Conferences</a><a href="videos.html">Videos</a><a href="about.html">About &amp; Contact</a></nav>
   </div></header>
   <main class="wrap" id="main">
-  <div class="page-heading"><p class="eyebrow">Research</p><h1>Thermal information.<br>Practical questions.</h1><p>Two recent examples of our work in infrared non-destructive testing and temperature measurement.</p></div>
+  <div class="page-heading"><p class="eyebrow">Research</p><div class="illustrated-heading"><img class="heading-illustration" src="assets/research-illustration.svg" alt="" width="96" height="88" aria-hidden="true"><div><h1>Thermal research topics.</h1><p class="heading-intro">Recent examples of our work in infrared nondestructive testing and temperature measurement.</p></div></div></div>
   <section class="research-grid" aria-label="Recent research topics">
-    <article class="research-card">
-      <figure><img src="assets/research-gunshot-residue.webp" width="900" height="554" alt="Thermogram and processed thermal images showing residue patterns around a bullet hole in fabric."><figcaption>Gunshot residue on fabric: thermal imaging and signal processing.</figcaption></figure>
-      <p class="eyebrow">Infrared non-destructive testing</p>
-      <h2>Revealing gunshot residue</h2>
-      <p>Can thermal imaging reveal gunshot residue without touching or damaging the evidence? We investigate flash-pulse thermography to map residue around bullet holes in fabrics. Quantitative image analysis helps distinguish residue indications and describe their spatial distribution, supporting research into shooting-distance estimation.</p>
-      <a href="https://doi.org/10.1016/j.infrared.2024.105366" target="_blank" rel="noopener noreferrer">Related paper ↗</a>
+    <article class="research-card" aria-labelledby="gsr-title">
+      <div class="research-area"><h2>Infrared nondestructive testing</h2></div>
+      <h3 id="gsr-title">Gunshot residue detection</h3>
+      <p class="research-subtitle">Investigating active thermography methods for detecting gunshot residue on fabrics.</p>
+      <p class="research-description">Can thermal imaging reveal gunshot residue without touching or damaging the evidence? We investigate flash-pulse thermography to map residue around bullet holes in fabrics. Quantitative image analysis helps distinguish residue indications and describe their spatial distribution, supporting research into shooting-distance estimation.</p>
+      <figure class="research-poster"><a href="assets/research-gsr-poster.webp" target="_blank" rel="noopener noreferrer" aria-label="Open full-size poster: Gunshot residue detection"><img src="assets/research-gsr-poster.webp" width="1200" height="940" alt="Research poster showing a controlled shooting experiment, an infrared camera and flash setup, residue around a bullet hole, and a processed thermal image." loading="lazy"></a><figcaption>From experimental samples to thermal residue patterns · Select image to enlarge ↗</figcaption></figure>
+      <dl class="research-highlights"><div><dt>Benefits</dt><dd>Rapid, contactless inspection that preserves the sample for further examination.</dd></div><div><dt>Novelty</dt><dd>Active thermal excitation combined with quantitative residue-pattern analysis and explainable machine learning.</dd></div><div><dt>Applications</dt><dd>A complementary tool for forensic laboratories investigating residue distributions and shooting distance.</dd></div></dl>
+      <div class="research-papers"><h4>Related papers</h4><ul><li><a href="https://doi.org/10.1080/17686733.2026.2670266" target="_blank" rel="noopener noreferrer">Explainable AI for shooting distance estimation from gunshot residue (GSR) via flash thermography ↗</a></li><li><a href="https://doi.org/10.3390/proceedings2025129062" target="_blank" rel="noopener noreferrer">Quantitative Analysis of Flash-Pulse Thermographic Detection of Gunshot Residue ↗</a></li><li><a href="https://doi.org/10.1016/j.infrared.2024.105366" target="_blank" rel="noopener noreferrer">Detection of gunshot residue by flash-pulse and long-pulse infrared thermography ↗</a></li></ul></div>
     </article>
-    <article class="research-card">
-      <figure><img src="assets/research-human-temperature.webp" width="900" height="350" alt="Facial thermograms from a FLIR A315 camera and the IR Face Scanner, showing external and internal reference sources."><figcaption>Facial temperature measurement: a reference camera and the IR Face Scanner.</figcaption></figure>
-      <p class="eyebrow">Thermography &amp; temperature measurement</p>
-      <h2>Measuring human temperature</h2>
-      <p>How reliable is non-contact temperature screening? We study how ambient conditions, calibration and the choice of facial region affect measurements. Our compact IR Face Scanner combines thermal imaging with an integrated heated reference to improve measurement stability and explore the practical limits of estimating body temperature from skin temperature.</p>
-      <a href="https://doi.org/10.1016/j.infrared.2024.105176" target="_blank" rel="noopener noreferrer">Related paper ↗</a>
+    <article class="research-card" aria-labelledby="human-title">
+      <div class="research-area"><h2>Thermography &amp; temperature measurement</h2></div>
+      <h3 id="human-title">Human temperature measurement</h3>
+      <p class="research-subtitle">Evaluating thermographic screening and developing a compact device with an integrated temperature reference.</p>
+      <p class="research-description">How reliable is non-contact temperature screening? We study how ambient conditions, calibration and the choice of facial region affect measurements. Our compact IR Face Scanner combines thermal imaging with an integrated heated reference to improve measurement stability and explore the practical limits of estimating body temperature from skin temperature.</p>
+      <figure class="research-poster"><a href="assets/research-temperature-poster.webp" target="_blank" rel="noopener noreferrer" aria-label="Open full-size poster: Human temperature measurement"><img src="assets/research-temperature-poster.webp" width="1200" height="940" alt="Research poster showing a volunteer measurement setup, a facial thermogram, the IR Face Scanner design and calibration results at different ambient temperatures." loading="lazy"></a><figcaption>From volunteer measurements to a calibrated compact device · Select image to enlarge ↗</figcaption></figure>
+      <dl class="research-highlights"><div><dt>Benefits</dt><dd>Fast, contactless measurement with a built-in reference to improve temperature stability.</dd></div><div><dt>Novelty</dt><dd>An integrated active reference element, supported by statistical studies of facial temperature and measurement conditions.</dd></div><div><dt>Applications</dt><dd>Development and evaluation of temperature-screening systems for workplaces and public spaces, with attention to the limits of skin-temperature measurement.</dd></div></dl>
+      <div class="research-papers"><h4>Related papers</h4><ul><li><a href="https://doi.org/10.1016/j.infrared.2024.105176" target="_blank" rel="noopener noreferrer">Thermographic device with a calibrating element for enhanced precision of human temperature measurement ↗</a></li><li><a href="https://doi.org/10.3390/engproc2023051017" target="_blank" rel="noopener noreferrer">Compact Thermographic Device with Built-in Active Reference Element for Increased Measurement Accuracy ↗</a></li><li><a href="https://doi.org/10.3390/s22218395" target="_blank" rel="noopener noreferrer">Statistical Study on Human Temperature Measurement by Infrared Thermography ↗</a></li><li><a href="https://doi.org/10.1109/MetroLivEnv54405.2022.9826942" target="_blank" rel="noopener noreferrer">Possibilities and limits of human temperature measurement by thermographic methods ↗</a></li><li><a href="https://doi.org/10.3390/engproc2021008004" target="_blank" rel="noopener noreferrer">Study on Human Temperature Measurement by Infrared Thermography ↗</a></li></ul></div>
     </article>
   </section><div class="next-link"><a href="projects.html">Explore projects →</a></div>
   </main>
