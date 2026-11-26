@@ -29,18 +29,96 @@ export function selectFundings(data) {
   }
   return result.sort((a,b) => b.sort - a.sort || a.title.localeCompare(b.title)).slice(0,5);
 }
-export function selectRepositories(data) {
+export function selectRepositories(data, contributed = []) {
   if (!Array.isArray(data)) throw new Error('Invalid GitHub response');
-  return data.filter(r => !r.private && !r.fork && !r.archived && r.owner?.login?.toLowerCase() === 'msvantny')
+  const repos = new Map();
+  for (const repo of contributed) {
+    if (!repo.private && !repo.archived && repo.full_name && repo.owner?.login?.toLowerCase() !== 'msvantny') {
+      repos.set(repo.full_name.toLowerCase(), {...repo, contribution: 'Contributed'});
+    }
+  }
+  for (const repo of data) {
+    if (!repo.private && !repo.fork && !repo.archived && repo.owner?.login?.toLowerCase() === 'msvantny') {
+      repos.set(repo.full_name?.toLowerCase() || repo.name.toLowerCase(), {...repo, contribution: 'Owned'});
+    }
+  }
+  return [...repos.values()]
     .sort((a,b) => (b.pushed_at || b.updated_at || '').localeCompare(a.pushed_at || a.updated_at || '') || a.name.localeCompare(b.name))
-    .slice(0,5).map(r=>({name:r.name,description:r.description || '',url:safeUrl(r.html_url) || 'https://github.com/msvantny',updated:(r.pushed_at || r.updated_at || '').slice(0,10)}));
+    .map(r=>({name:r.contribution === 'Owned' ? r.name : r.full_name,contribution:r.contribution,description:r.description || '',url:safeUrl(r.html_url) || 'https://github.com/msvantny',updated:(r.pushed_at || r.updated_at || '').slice(0,10)}));
 }
 export function fundingMarkup(items) {
   return items.map(p=>'<li class="publication-item"><article><h3><a href="'+escape(p.url)+'" target="_blank" rel="noopener noreferrer">'+escape(p.title)+'</a></h3><p class="project-dates">'+escape(p.years)+'</p><p class="publication-meta">Funder: '+escape(p.sponsor || 'Not listed in ORCID')+'</p><p class="publication-meta">Project ID: '+escape(p.id || 'Not listed in ORCID')+'</p></article></li>').join('\n');
 }
 export function repositoryMarkup(items) {
-  return items.map(r=>'<li class="publication-item"><article><h3><a href="'+escape(r.url)+'" target="_blank" rel="noopener noreferrer">'+escape(r.name)+' ↗</a></h3>'+(r.description?'<p class="publication-meta">'+escape(r.description)+'</p>':'')+(r.updated?'<p class="publication-meta">Last activity: '+escape(r.updated)+'</p>':'')+'</article></li>').join('\n');
+  return items.map(r=>'<li class="publication-item"><article><h3><a href="'+escape(r.url)+'" target="_blank" rel="noopener noreferrer">'+escape(r.name)+' ↗</a></h3>'+(r.contribution?'<p class="publication-meta">'+escape(r.contribution)+'</p>':'')+(r.description?'<p class="publication-meta">'+escape(r.description)+'</p>':'')+(r.updated?'<p class="publication-meta">Last activity: '+escape(r.updated)+'</p>':'')+'</article></li>').join('\n');
 }
+const githubApi = 'https://api.github.com';
+
+async function githubJson(url, signal) {
+  const response = await fetch(url, {
+    headers: {Accept:'application/vnd.github+json'}, credentials:'omit', signal
+  });
+  if (!response.ok) throw new Error('GitHub unavailable');
+  return response.json();
+}
+
+async function searchContributions(kind, query, signal) {
+  const items = [];
+  for (let page = 1; page <= 10; page++) {
+    const url = new URL(githubApi + '/search/' + kind);
+    url.search = new URLSearchParams({q:query, per_page:'100', page:String(page)});
+    const result = await githubJson(url, signal);
+    if (result.incomplete_results || !Array.isArray(result.items)) throw new Error('Incomplete GitHub search');
+    items.push(...result.items);
+    if (items.length >= result.total_count || result.items.length < 100) return items;
+  }
+  throw new Error('GitHub search limit reached');
+}
+
+async function refreshRepositories() {
+  const list = document.getElementById('github-project-list');
+  const status = document.getElementById('github-status');
+  if (!list || !status) return;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  const {signal} = controller;
+  try {
+    const [owned, commits, pullRequests] = await Promise.all([
+      githubJson(REPOS_API, signal),
+      searchContributions('commits', 'author:msvantny', signal),
+      searchContributions('issues', 'author:msvantny is:pr is:public', signal)
+    ]);
+    const paths = new Map();
+    for (const path of [
+      ...commits.map(item => item.repository?.url),
+      ...pullRequests.map(item => item.repository_url)
+    ]) {
+      if (/^https:\/\/api\.github\.com\/repos\/[\w.-]+\/[\w.-]+$/.test(path || '') &&
+          !path.toLowerCase().startsWith(githubApi + '/repos/msvantny/')) {
+        paths.set(path.toLowerCase(), path);
+      }
+    }
+
+    // A transferred repository can take time to appear in the search index.
+    const loader = githubApi + '/repos/labirthermal/LabIR-File-Python-Loader';
+    if (!paths.has(loader.toLowerCase())) {
+      const history = await githubJson(loader + '/commits?author=msvantny&per_page=1', signal).catch(() => []);
+      if (history.length) paths.set(loader.toLowerCase(), loader);
+    }
+    const contributed = await Promise.all([...paths.values()].map(path => githubJson(path, signal)));
+    const projects = selectRepositories(owned, contributed);
+    list.innerHTML = projects.length ? repositoryMarkup(projects) : '<li class="source-empty">No public GitHub projects listed.</li>';
+    const checked = new Intl.DateTimeFormat('en-GB',{dateStyle:'medium'}).format(new Date());
+    status.textContent = 'Source: GitHub · ' + projects.length + ' public ' +
+      (projects.length === 1 ? 'repository' : 'repositories') +
+      ' · Owned or contributed to · Checked ' + checked + '.';
+  } catch {
+    status.textContent += ' Live refresh is currently unavailable; showing the saved list.';
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function refresh(url, select, render, listId, statusId, source) {
   const list=document.getElementById(listId), status=document.getElementById(statusId);
   if(!list || !status) return;
@@ -58,5 +136,5 @@ async function refresh(url, select, render, listId, statusId, source) {
 }
 if(typeof document!=='undefined') {
   refresh(FUNDINGS_API,selectFundings,fundingMarkup,'funded-project-list','funding-status','ORCID');
-  refresh(REPOS_API,selectRepositories,repositoryMarkup,'github-project-list','github-status','GitHub');
+  refreshRepositories();
 }
